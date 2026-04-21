@@ -1,0 +1,247 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+using namespace std;
+
+// 1. Kadane's Algorithm - Maximum Subarray Sum
+int maxSubarraySum(const vector<int>& arr) {
+    int maxSoFar = INT_MIN;
+    int currSum = 0;
+
+    for (int x : arr) {
+        currSum += x;
+        maxSoFar = max(maxSoFar, currSum);
+        if (currSum < 0) currSum = 0;
+    }
+    return maxSoFar;
+}
+
+// 2. Two Pointers - Pair Sum in Sorted Array
+bool pairSumSorted(const vector<int>& arr, int target, pair<int, int>& result) {
+    int left = 0, right = arr.size() - 1;
+
+    while (left < right) {
+        int sum = arr[left] + arr[right];
+        if (sum == target) {
+            result = {arr[left], arr[right]};
+            return true;
+        } else if (sum < target) {
+            left++;
+        } else {
+            right--;
+        }
+    }
+    return false;
+}
+
+// 3. Sliding Window - Maximum sum of subarray of size k
+int maxSumSubarrayOfSizeK(const vector<int>& arr, int k) {
+    int n = arr.size();
+    if (k > n || k <= 0) return -1;
+
+    int windowSum = 0;
+    for (int i = 0; i < k; i++) {
+        windowSum += arr[i];
+    }
+
+    int maxSum = windowSum;
+    for (int i = k; i < n; i++) {
+        windowSum += arr[i] - arr[i - k];
+        maxSum = max(maxSum, windowSum);
+    }
+    return maxSum;
+}
+
+// 4. Binary Search
+int binarySearch(const vector<int>& arr, int target) {
+    int left = 0, right = arr.size() - 1;
+
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        if (arr[mid] == target) return mid;
+        else if (arr[mid] < target) left = mid + 1;
+        else right = mid - 1;
+    }
+    return -1;
+}
+
+// 5. Greedy - Minimum Coins
+vector<int> minCoinsGreedy(int amount, vector<int> coins) {
+    sort(coins.rbegin(), coins.rend());
+    vector<int> used;
+
+    for (int coin : coins) {
+        while (amount >= coin) {
+            amount -= coin;
+            used.push_back(coin);
+        }
+    }
+
+    if (amount != 0) return {};
+    return used;
+}
+
+// 6. DP - Climbing Stairs
+int climbingStairs(int n) {
+    if (n <= 2) return n;
+
+    int prev2 = 1, prev1 = 2, curr;
+
+    for (int i = 3; i <= n; i++) {
+        curr = prev1 + prev2;
+        prev2 = prev1;
+        prev1 = curr;
+    }
+    return prev1;
+}
+
+// 7. Recursion - Subset Sum
+bool subsetSumRec(vector<int>& arr, int index, int target) {
+    if (target == 0) return true;
+    if (index == arr.size() || target < 0) return false;
+
+    return subsetSumRec(arr, index + 1, target - arr[index]) ||
+           subsetSumRec(arr, index + 1, target);
+}
+
+// Input helper
+vector<int> inputArray() {
+    int n;
+    cout << "Enter size of array: ";
+    cin >> n;
+
+    vector<int> arr(n);
+    cout << "Enter elements: ";
+    for (int i = 0; i < n; i++) cin >> arr[i];
+
+    return arr;
+}
+
+// Menu
+void printMenu() {
+    cout << "\n===== AlgoPlayground =====\n";
+    cout << "1. Maximum Subarray Sum (Kadane)\n";
+    cout << "2. Pair Sum (Two Pointers)\n";
+    cout << "3. Max Sum Subarray of Size K (Sliding Window)\n";
+    cout << "4. Binary Search\n";
+    cout << "5. Minimum Coins (Greedy)\n";
+    cout << "6. Climbing Stairs (DP)\n";
+    cout << "7. Subset Sum (Recursion)\n";
+    cout << "8. Exit\n";
+    cout << "Enter your choice: ";
+}
+
+int main() {
+    int choice;
+
+    while (true) {
+        printMenu();
+        cin >> choice;
+
+        if (choice == 8) {
+            cout << "Exiting...\n";
+            break;
+        }
+
+        switch (choice) {
+
+            case 1: {
+                vector<int> arr = inputArray();
+                cout << "Max Subarray Sum = " << maxSubarraySum(arr) << "\n";
+                break;
+            }
+
+            case 2: {
+                vector<int> arr = inputArray();
+                int target;
+                cout << "Enter target: ";
+                cin >> target;
+
+                pair<int, int> ans;
+                if (pairSumSorted(arr, target, ans))
+                    cout << "Pair found: " << ans.first << " " << ans.second << "\n";
+                else
+                    cout << "No pair found\n";
+                break;
+            }
+
+            case 3: {
+                vector<int> arr = inputArray();
+                int k;
+                cout << "Enter k: ";
+                cin >> k;
+
+                int res = maxSumSubarrayOfSizeK(arr, k);
+                if (res == -1) cout << "Invalid k\n";
+                else cout << "Max sum = " << res << "\n";
+                break;
+            }
+
+            case 4: {
+                vector<int> arr = inputArray();
+                int target;
+                cout << "Enter target: ";
+                cin >> target;
+
+                int index = binarySearch(arr, target);
+                if (index != -1)
+                    cout << "Found at index " << index << "\n";
+                else
+                    cout << "Not found\n";
+                break;
+            }
+
+            case 5: {
+                int amount, m;
+                cout << "Enter amount: ";
+                cin >> amount;
+
+                cout << "Enter number of coins: ";
+                cin >> m;
+
+                vector<int> coins(m);
+                cout << "Enter coins: ";
+                for (int i = 0; i < m; i++) cin >> coins[i];
+
+                vector<int> used = minCoinsGreedy(amount, coins);
+
+                if (used.empty())
+                    cout << "Cannot form amount\n";
+                else {
+                    cout << "Coins used: ";
+                    for (int c : used) cout << c << " ";
+                    cout << "\nTotal coins: " << used.size() << "\n";
+                }
+                break;
+            }
+
+            case 6: {
+                int n;
+                cout << "Enter n: ";
+                cin >> n;
+
+                cout << "Ways = " << climbingStairs(n) << "\n";
+                break;
+            }
+
+            case 7: {
+                vector<int> arr = inputArray();
+                int target;
+                cout << "Enter target: ";
+                cin >> target;
+
+                if (subsetSumRec(arr, 0, target))
+                    cout << "Subset exists\n";
+                else
+                    cout << "No subset found\n";
+                break;
+            }
+
+            default:
+                cout << "Invalid choice\n";
+        }
+    }
+
+    return 0;
+}
